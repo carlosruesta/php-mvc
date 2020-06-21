@@ -3,21 +3,26 @@
 namespace Alura\Cursos\Controller;
 
 use Alura\Cursos\Entity\Curso;
+use Alura\Cursos\Helper\FlashMessageTrait;
 use Alura\Cursos\Helper\RenderizadorDeHtmlTrait;
 use Alura\Cursos\Infra\EntityManagerCreator;
+use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Nyholm\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
-class FormularioEdicao implements InterfaceControladorRequisicao
+class FormularioEdicao implements RequestHandlerInterface
 {
 
-    use RenderizadorDeHtmlTrait;
+    use RenderizadorDeHtmlTrait, FlashMessageTrait;
 
     /** @var EntityManagerInterface */
     private $entityManager;
 
+    /** @var ObjectRepository repositorioCursos */
     private $repositorioCursos;
-
-    /** @var  */
 
     public function __construct()
     {
@@ -25,20 +30,27 @@ class FormularioEdicao implements InterfaceControladorRequisicao
         $this->repositorioCursos = $this->entityManager->getRepository(Curso::class);
     }
 
-    public function processaRequisicao(): void
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
         if (is_null($id) || $id === false) {
-            header('Location: /listar-cursos');
-            return;
+            return new Response(302, ['Location' => '/listar-cursos']);
         }
 
         /** @var Curso $curso */
         $curso = $this->repositorioCursos->find($id);
-        echo $this->renderizaHtml('cursos/formulario.php', [
+
+        if (is_null($curso)) {
+            $this->defineMensagem("danger", "Curso não identificado");
+            return new Response(302, ['Location' => '/listar-cursos']);
+        }
+
+        $html = $this->renderizaHtml('cursos/formulario.php', [
             'curso' => $curso,
             'titulo' => 'Alterar curso ' . $curso->getDescricao()
         ]);
+
+        return new Response(200, [], $html);
     }
 }
