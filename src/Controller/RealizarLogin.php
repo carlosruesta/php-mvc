@@ -4,7 +4,6 @@ namespace Alura\Cursos\Controller;
 
 use Alura\Cursos\Entity\Usuario;
 use Alura\Cursos\Helper\FlashMessageTrait;
-use Alura\Cursos\Infra\EntityManagerCreator;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Nyholm\Psr7\Response;
@@ -31,14 +30,16 @@ class RealizarLogin implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $email = filter_input(INPUT_POST,'email', FILTER_VALIDATE_EMAIL);
+        $parametros = $request->getParsedBody();
+
+        $email = filter_var($parametros['email'], FILTER_VALIDATE_EMAIL);
 
         if (is_null($email) || $email === false) {
             $this->defineMensagem('danger', 'O e-mail digitado não é um e-mail válido');
             return new Response(302, ['Location' => '/login']);
         }
 
-        $senha = filter_input(INPUT_POST, 'senha', FILTER_SANITIZE_STRING);
+        $senha = filter_var($parametros['senha'], FILTER_SANITIZE_STRING);
 
         /** @var Usuario $usuario */
         $usuario = $this->repositorioUsuarios->findOneBy(['email' => $email]);

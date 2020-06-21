@@ -24,14 +24,21 @@ class Persistencia implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $descricao = filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_STRING);
+        $parametrosBody = $request->getParsedBody();
+
+        $descricao = filter_var($parametrosBody['descricao'], FILTER_SANITIZE_STRING);
 
         $curso = new Curso();
         $curso->setDescricao($descricao);
 
-        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        $parametrosQuery = $request->getQueryParams();
 
-        if (!is_null($id) && $id !== false) {
+        if (isset($parametrosQuery['id'])) {
+            $id = filter_var($parametrosQuery['id'], FILTER_VALIDATE_INT);
+            if (is_null($id) || $id === false) {
+                $this->defineMensagem('danger', 'Id inválido do curso');
+                return new Response(403, ['Location' => '/listar-cursos']);
+            }
             $curso->setId($id);
             $this->entityManager->merge($curso);
             $mensagem = 'Curso atualizado com sucesso';

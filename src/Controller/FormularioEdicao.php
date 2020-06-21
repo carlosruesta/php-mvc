@@ -30,7 +30,8 @@ class FormularioEdicao implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        $parametros = $request->getQueryParams();
+        $id = filter_var($parametros['id'], FILTER_VALIDATE_INT);
 
         if (is_null($id) || $id === false) {
             return new Response(302, ['Location' => '/listar-cursos']);
