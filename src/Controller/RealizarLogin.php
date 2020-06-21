@@ -6,6 +6,7 @@ use Alura\Cursos\Entity\Usuario;
 use Alura\Cursos\Helper\FlashMessageTrait;
 use Alura\Cursos\Infra\EntityManagerCreator;
 use Doctrine\Common\Persistence\ObjectRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,9 +20,12 @@ class RealizarLogin implements RequestHandlerInterface
     /** @var ObjectRepository */
     private $repositorioUsuarios;
 
-    public function __construct()
+    /** @var EntityManagerInterface */
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $entityManager = (new EntityManagerCreator())->getEntityManager();
+        $this->entityManager = $entityManager;
         $this->repositorioUsuarios = $entityManager->getRepository(Usuario::class);
     }
 

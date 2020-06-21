@@ -51,13 +51,32 @@ $request = $creator->fromGlobals();
 $classeControladora = $rotas[$caminho];
 
 /**
+ *  Para implementar injeção de dependências usaremos o conceito de Container.
+ * Isso está documentado na PSR-11. Utilizaremos o pacote PHP-DI que implementa essa PSR
+ *
+ * composer require php-di/php-di
+ *
+ * Criaremos um Construtor de Container: ContainerBuilder.
+ * Esse construtor de dependencias ajudará a criar para cada Controller os
+ * objetos dependentes. Por exemplo o EntityManager será criado utilizando fábricas/funções/factories
+ * que chamaram o próprio EntityManagerCreator.
+ *
+ */
+
+/** @var \Psr\Container\ContainerInterface $container */
+$container = require __DIR__ . '/../config/dependencies.php';
+
+/**
  * Uso do PSR-15 utilizando a RequestHandlerInterface como interface controladora
  * Para isso adicionamos o composer require psr/http-server-handler que nos fornece a
  * interface RequestHandlerInterface. Essa interface será implementada em todos os Controllers
  * da aplicação e com isso padronizamos o sistema
  */
 /** @var RequestHandlerInterface $controlador */
-$controlador = new $classeControladora();
+// $controlador = new $classeControladora();
+
+/** @var RequestHandlerInterface $controlador */
+$controlador = $container->get($classeControladora);
 
 /** @var ResponseInterface $response */
 $response = $controlador->handle($request);

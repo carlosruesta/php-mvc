@@ -5,7 +5,6 @@ namespace Alura\Cursos\Controller;
 use Alura\Cursos\Entity\Curso;
 use Alura\Cursos\Helper\FlashMessageTrait;
 use Alura\Cursos\Helper\RenderizadorDeHtmlTrait;
-use Alura\Cursos\Infra\EntityManagerCreator;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Nyholm\Psr7\Response;
@@ -15,7 +14,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class FormularioEdicao implements RequestHandlerInterface
 {
-
     use RenderizadorDeHtmlTrait, FlashMessageTrait;
 
     /** @var EntityManagerInterface */
@@ -24,9 +22,9 @@ class FormularioEdicao implements RequestHandlerInterface
     /** @var ObjectRepository repositorioCursos */
     private $repositorioCursos;
 
-    public function __construct()
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->entityManager = (new EntityManagerCreator())->getEntityManager();
+        $this->entityManager = $entityManager;
         $this->repositorioCursos = $this->entityManager->getRepository(Curso::class);
     }
 
